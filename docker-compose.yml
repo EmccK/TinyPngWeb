@@ -9,4 +9,5 @@ services:
     environment:
       - NODE_ENV=production
       - DEBUG=express:*  # 添加Express调试信息
+      - API_KEY=${API_KEY:-}  # TinyPNG API Key
     restart: unless-stopped

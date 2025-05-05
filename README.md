@@ -85,6 +85,14 @@ TinyCompress is a web application that allows you to compress images using the T
 ## Environment Variables
 
 - `PORT` - Port for the server (default: 3001)
+- `API_KEY` - TinyPNG API key (can be set instead of using the UI)
+
+You can copy the `.env.example` file to `.env` and set your environment variables:
+
+```bash
+cp .env.example .env
+# Then edit .env with your preferred text editor
+```
 
 ## Project Structure
 

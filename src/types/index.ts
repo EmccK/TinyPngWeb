@@ -12,6 +12,8 @@ export interface CompressedImage {
 export interface ApiKeyContextType {
   apiKey: string;
   setApiKey: (key: string) => void;
+  isApiKeySet: boolean;
+  apiKeySource: 'environment' | 'localStorage' | 'userInput' | null;
 }
 
 export interface CompressedImageHistory {

@@ -19,6 +19,7 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const DEFAULT_API_KEY = process.env.API_KEY || '';
 
 // 配置multer用于处理文件上传
 const storage = multer.diskStorage({
@@ -98,7 +99,8 @@ if (distPath) {
 // 代理TinyPNG压缩请求 - 直接上传文件
 app.post('/api/tinypng/shrink/file', upload.single('image'), async (req, res) => {
   try {
-    const apiKey = req.body.apiKey;
+    // Use API key from request or fall back to environment variable
+    const apiKey = req.body.apiKey || DEFAULT_API_KEY;
 
     if (!apiKey || !req.file) {
       return res.status(400).json({
@@ -171,7 +173,9 @@ app.post('/api/tinypng/shrink/file', upload.single('image'), async (req, res) =>
 // 代理TinyPNG压缩请求 - 通过URL
 app.post('/api/tinypng/shrink/url', async (req, res) => {
   try {
-    const { apiKey, imageUrl } = req.body;
+    // Use API key from request or fall back to environment variable
+    const apiKey = req.body.apiKey || DEFAULT_API_KEY;
+    const { imageUrl } = req.body;
 
     if (!apiKey || !imageUrl) {
       return res.status(400).json({
@@ -213,7 +217,9 @@ app.post('/api/tinypng/shrink/url', async (req, res) => {
 // 代理下载压缩后的图片
 app.get('/api/tinypng/output', async (req, res) => {
   try {
-    const { url, apiKey } = req.query;
+    const url = req.query.url;
+    // Use API key from request or fall back to environment variable
+    const apiKey = req.query.apiKey || DEFAULT_API_KEY;
 
     if (!url || !apiKey) {
       return res.status(400).json({ error: 'URL and API key are required' });
@@ -301,6 +307,16 @@ app.delete('/api/images/:filename', (req, res) => {
 // 添加一个简单的健康检查端点
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// 添加一个API端点来检查API_KEY状态
+app.get('/api/status/apikey', (req, res) => {
+  // 检查是否设置了环境变量API_KEY
+  const hasEnvApiKey = !!DEFAULT_API_KEY;
+  res.json({
+    hasApiKey: hasEnvApiKey,
+    source: hasEnvApiKey ? 'environment' : null
+  });
 });
 
 // 启动服务器

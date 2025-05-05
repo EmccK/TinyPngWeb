@@ -83,6 +83,14 @@ TinyCompress 是一个使用 TinyPNG API 的网页应用，提供简单直观的
 ## 环境变量
 
 - `PORT` - 服务器端口（默认：3001）
+- `API_KEY` - TinyPNG API 密钥（可以设置环境变量而不通过界面输入）
+
+你可以复制 `.env.example` 文件到 `.env` 并设置你的环境变量：
+
+```bash
+cp .env.example .env
+# 然后用你喜欢的文本编辑器编辑 .env 文件
+```
 
 ## 项目结构
 

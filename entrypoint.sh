@@ -22,6 +22,13 @@ else
   exit 1
 fi
 
+# 检查环境变量
+if [ -n "$API_KEY" ]; then
+  echo "API_KEY environment variable is set"
+else
+  echo "API_KEY environment variable is not set (will use UI input if needed)"
+fi
+
 # 启动服务器
 echo "Starting server..."
 exec node proxy-server.js
