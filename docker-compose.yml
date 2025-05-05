@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "30009:3001"  # 代理服务器同时提供API和前端静态文件
+    volumes:
+      - ./uploads:/app/uploads  # 挂载上传目录
+    environment:
+      - NODE_ENV=production
+      - DEBUG=express:*  # 添加Express调试信息
+    restart: unless-stopped

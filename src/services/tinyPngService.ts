@@ -6,7 +6,7 @@ export const compressImage = async (
   file: File,
   apiKey: string,
   onProgress?: (progress: number) => void
-): Promise<{ url: string; size: number }> => {
+): Promise<{ url: string; size: number; serverPath?: string; originalName?: string }> => {
   try {
     if (onProgress) {
       onProgress(25);
@@ -17,8 +17,11 @@ export const compressImage = async (
     formData.append('image', file);
     formData.append('apiKey', apiKey);
 
+    // 获取API基础URL
+    const apiBaseUrl = import.meta.env.PROD ? '' : 'http://localhost:3001';
+
     // Call TinyPNG API through our proxy server
-    const response = await fetch('http://localhost:3001/api/tinypng/shrink/file', {
+    const response = await fetch(`${apiBaseUrl}/api/tinypng/shrink/file`, {
       method: 'POST',
       body: formData
     });
@@ -33,37 +36,25 @@ export const compressImage = async (
     const responseData = await response.json();
 
     if (onProgress) {
-      onProgress(50);
-    }
-
-    // Get the URL of the compressed image from the Location header
-    const outputUrl = responseData.location;
-
-    if (!outputUrl) {
-      throw new Error('No output URL received from TinyPNG');
-    }
-
-    // Download the compressed image through our proxy server
-    const outputResponse = await fetch(`http://localhost:3001/api/tinypng/output?url=${encodeURIComponent(outputUrl)}&apiKey=${encodeURIComponent(apiKey)}`);
-
-    if (!outputResponse.ok) {
-      throw new Error('Failed to download compressed image');
-    }
-
-    if (onProgress) {
       onProgress(75);
     }
 
-    // Create a blob from the compressed image data
-    const compressedBlob = await outputResponse.blob();
+    // 使用服务器返回的压缩图片URL
+    const compressedUrl = responseData.compressedUrl;
+
+    if (!compressedUrl) {
+      throw new Error('No compressed URL received');
+    }
 
     if (onProgress) {
       onProgress(100);
     }
 
     return {
-      url: URL.createObjectURL(compressedBlob),
+      url: compressedUrl, // 使用服务器上的URL
       size: responseData.output.size,
+      serverPath: responseData.compressedFile, // 保存服务器上的文件路径
+      originalName: responseData.originalName // 保存原始文件名
     };
   } catch (error) {
     console.error('Error compressing image:', error);
@@ -91,6 +82,8 @@ export const processImages = async (
           compressedSize: result.size,
           status: 'success' as const,
           progress: 100,
+          serverPath: result.serverPath, // 添加服务器路径
+          originalName: result.originalName || image.originalFile.name // 添加原始文件名
         };
 
         updateImage(image.id, {
@@ -98,6 +91,7 @@ export const processImages = async (
           compressedSize: result.size,
           status: 'success',
           progress: 100,
+          serverPath: result.serverPath, // 添加服务器路径
         });
 
         // Save successful compression to history

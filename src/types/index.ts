@@ -22,4 +22,6 @@ export interface CompressedImageHistory {
   compressedAt: string;
   savings: number;
   compressedDataUrl?: string; // Base64 data URL for the compressed image
+  serverPath?: string; // 服务器上的文件路径
+  compressedUrl?: string; // 服务器上的URL
 }

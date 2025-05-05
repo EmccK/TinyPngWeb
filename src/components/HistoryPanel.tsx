@@ -47,17 +47,37 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ history, onHistoryChange, c
   }, [currentImages]);
 
   const handleDownload = (item: CompressedImageHistory) => {
-    if (!item.compressedDataUrl) {
-      alert('Compressed image data is not available');
+    // 优先使用服务器URL
+    if (item.compressedUrl) {
+      // 如果是服务器URL，直接打开下载链接
+      const link = document.createElement('a');
+
+      // 获取完整URL
+      const baseUrl = import.meta.env.PROD ? window.location.origin : 'http://localhost:3001';
+      const fullUrl = item.compressedUrl.startsWith('http')
+        ? item.compressedUrl
+        : `${baseUrl}${item.compressedUrl}`;
+
+      link.href = fullUrl;
+      link.download = `compressed-${item.originalName}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       return;
     }
 
-    const link = document.createElement('a');
-    link.href = item.compressedDataUrl;
-    link.download = `compressed-${item.originalName}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // 回退到使用data URL
+    if (item.compressedDataUrl) {
+      const link = document.createElement('a');
+      link.href = item.compressedDataUrl;
+      link.download = `compressed-${item.originalName}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    alert('Compressed image data is not available');
   };
 
   const handleClearHistory = () => {
@@ -185,9 +205,13 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ history, onHistoryChange, c
             {displayedHistory.map((item) => (
               <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                 <div className="flex items-center">
-                  {item.compressedDataUrl ? (
+                  {item.compressedUrl || item.compressedDataUrl ? (
                     <img
-                      src={item.compressedDataUrl}
+                      src={item.compressedUrl
+                        ? (item.compressedUrl.startsWith('http')
+                          ? item.compressedUrl
+                          : `${import.meta.env.PROD ? '' : 'http://localhost:3001'}${item.compressedUrl}`)
+                        : item.compressedDataUrl}
                       alt={item.originalName}
                       className="h-12 w-12 object-cover rounded mr-3"
                     />
@@ -207,8 +231,8 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ history, onHistoryChange, c
                 </div>
                 <button
                   onClick={() => handleDownload(item)}
-                  disabled={!item.compressedDataUrl}
-                  className={`flex items-center px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 ${!item.compressedDataUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={!item.compressedDataUrl && !item.compressedUrl}
+                  className={`flex items-center px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 ${!item.compressedDataUrl && !item.compressedUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <Download className="h-4 w-4 mr-1" />
                   Download

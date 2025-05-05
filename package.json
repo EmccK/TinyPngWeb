@@ -8,6 +8,9 @@
     "proxy": "node proxy-server.js",
     "dev": "concurrently \"npm run web\" \"npm run proxy\"",
     "build": "vite build",
+    "start": "npm run build && node proxy-server.js",
+    "start:api": "node proxy-server.js",
+    "start:script": "./start.sh",
     "lint": "eslint .",
     "preview": "vite preview"
   },

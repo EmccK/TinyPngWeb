@@ -7,14 +7,21 @@ export const saveToHistory = async (image: CompressedImage): Promise<void> => {
 
   const history = getHistory();
 
-  // Convert blob URL to data URL for storage
+  // 检查是否是服务器URL
+  const isServerUrl = image.compressedUrl.startsWith('/uploads/') ||
+                      image.compressedUrl.startsWith('http') &&
+                      image.compressedUrl.includes('/uploads/');
+
+  // 如果不是服务器URL，则转换为data URL
   let compressedDataUrl: string | undefined;
-  try {
-    const response = await fetch(image.compressedUrl);
-    const blob = await response.blob();
-    compressedDataUrl = await blobToDataURL(blob);
-  } catch (error) {
-    console.error('Failed to convert blob to data URL:', error);
+  if (!isServerUrl) {
+    try {
+      const response = await fetch(image.compressedUrl);
+      const blob = await response.blob();
+      compressedDataUrl = await blobToDataURL(blob);
+    } catch (error) {
+      console.error('Failed to convert blob to data URL:', error);
+    }
   }
 
   const historyEntry: CompressedImageHistory = {
@@ -24,7 +31,9 @@ export const saveToHistory = async (image: CompressedImage): Promise<void> => {
     compressedSize: image.compressedSize,
     compressedAt: new Date().toISOString(),
     savings: ((image.originalSize - image.compressedSize) / image.originalSize) * 100,
-    compressedDataUrl
+    compressedDataUrl,
+    serverPath: (image as any).serverPath, // 添加服务器路径
+    compressedUrl: isServerUrl ? image.compressedUrl : undefined // 如果是服务器URL，则保存
   };
 
   history.unshift(historyEntry);
