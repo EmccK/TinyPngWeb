@@ -14,7 +14,7 @@ import Stats from './components/Stats';
 import HistoryPanel from './components/HistoryPanel';
 
 function App() {
-  const { apiKey, isApiKeySet } = useApiKey();
+  const { apiKey, isApiKeySet, isEditingApiKey, setIsEditingApiKey } = useApiKey();
   const [images, setImages] = useState<CompressedImage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [history, setHistory] = useState<CompressedImageHistory[]>([]);
@@ -95,9 +95,11 @@ function App() {
 
       <main className="flex-grow px-4 sm:px-6 py-8">
         <div className="max-w-5xl mx-auto">
-          {!isApiKeySet && <ApiKeyForm />}
+          {(!isApiKeySet || isEditingApiKey) && (
+            <ApiKeyForm onCancel={() => setIsEditingApiKey(false)} />
+          )}
 
-          {isApiKeySet && (
+          {isApiKeySet && !isEditingApiKey && (
             <>
               {/* Show history panel at the top */}
               <HistoryPanel

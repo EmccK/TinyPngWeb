@@ -14,6 +14,8 @@ export interface ApiKeyContextType {
   setApiKey: (key: string) => void;
   isApiKeySet: boolean;
   apiKeySource: 'environment' | 'localStorage' | 'userInput' | null;
+  isEditingApiKey: boolean;
+  setIsEditingApiKey: (isEditing: boolean) => void;
 }
 
 export interface CompressedImageHistory {

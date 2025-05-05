@@ -7,6 +7,7 @@ export const ApiKeyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [apiKey, setApiKey] = useState<string>('');
   const [apiKeySource, setApiKeySource] = useState<'environment' | 'localStorage' | 'userInput' | null>(null);
   const [isApiKeySet, setIsApiKeySet] = useState<boolean>(false);
+  const [isEditingApiKey, setIsEditingApiKey] = useState<boolean>(false);
 
   // 检查服务器端是否设置了API_KEY环境变量
   const checkServerApiKeyStatus = async () => {
@@ -53,10 +54,17 @@ export const ApiKeyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   const saveApiKey = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem('tinyPngApiKey', key);
-    setApiKeySource('userInput');
-    setIsApiKeySet(!!key);
+    if (key) {
+      // If a key is provided, save it to localStorage
+      localStorage.setItem('tinyPngApiKey', key);
+      setApiKey(key);
+      setApiKeySource('userInput');
+      setIsApiKeySet(true);
+      setIsEditingApiKey(false); // Exit edit mode
+    } else {
+      // If an empty key is provided, enter edit mode
+      setIsEditingApiKey(true);
+    }
   };
 
   return (
@@ -64,7 +72,9 @@ export const ApiKeyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       apiKey,
       setApiKey: saveApiKey,
       isApiKeySet,
-      apiKeySource
+      apiKeySource,
+      isEditingApiKey,
+      setIsEditingApiKey
     }}>
       {children}
     </ApiKeyContext.Provider>
