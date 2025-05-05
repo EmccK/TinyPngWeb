@@ -1,5 +1,7 @@
 # TinyCompress - Image Compression Tool
 
+[中文文档](README.zh-CN.md)
+
 TinyCompress is a web application that allows you to compress images using the TinyPNG API. It provides a simple and intuitive interface for uploading, compressing, and downloading images.
 
 ## Features
@@ -96,6 +98,8 @@ This project includes GitHub Actions workflows for:
 
 - Building and pushing Docker images to GitHub Container Registry
 - Automated testing and linting
+
+For detailed instructions on setting up GitHub repository permissions for Docker image publishing, please refer to [GitHub Setup Guide](GITHUB_SETUP.md).
 
 ## License
 
